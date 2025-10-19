@@ -1,5 +1,6 @@
 #include "../main/strings/string_buffer.h"
 #include "test_framework/test_framework.h"
+#include "test_framework/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -200,6 +201,29 @@ int main(void) {
   ASSERT_EQ_STR(&tf, "remove substring", get_content(sb), "Hello");
 
   free_string_buffer(sb);
+
+  /* Test Suite 9: Space Complexity Analysis */
+  begin_test_suite(&tf, "Space Complexity O(n)");
+  
+  init_memory_tracker();
+  
+  sb = create_string_buffer();
+  size_t base_memory = get_memory_stats().current_usage;
+  
+  // Test O(n) space - memory should grow linearly with string length
+  append_string(sb, "Hello");
+  size_t memory_5_chars = get_memory_stats().current_usage - base_memory;
+  
+  append_string(sb, " World Test String");
+  size_t memory_23_chars = get_memory_stats().current_usage - base_memory;
+  
+  ASSERT_TRUE(&tf, "Memory grows with content", memory_23_chars > memory_5_chars);
+  ASSERT_TRUE(&tf, "Space complexity O(n)", memory_23_chars <= memory_5_chars * 6);
+  
+  free_string_buffer(sb);
+  
+  MemoryStats final_stats = get_memory_stats();
+  ASSERT_EQ_INT(&tf, "No memory leaks", final_stats.current_usage, 0);
 
   /* Final Summary */
   print_summary(&tf);

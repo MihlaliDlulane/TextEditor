@@ -1,0 +1,23 @@
+# Build artifacts
+obj/
+bin/
+*.exe
+*.o
+
+# IDE files
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Debug files
+*.pdb
+*.ilk
+
+# Temporary files
+*.tmp
+*.temp
