@@ -5,6 +5,21 @@ TESTDIR = src/tests
 OBJDIR = obj
 BINDIR = bin
 
+# Detect OS
+ifeq ($(OS),Windows_NT)
+    EXE_EXT = .exe
+    MKDIR = mkdir
+    RM = rmdir /s /q
+    PATH_SEP = \\
+    RUN_TEST = $(BINDIR)\\$$t.exe
+else
+    EXE_EXT =
+    MKDIR = mkdir -p
+    RM = rm -rf
+    PATH_SEP = /
+    RUN_TEST = ./$(BINDIR)/$$t
+endif
+
 # Source files
 SOURCES = $(SRCDIR)/strings/string_buffer.c \
           $(SRCDIR)/arrays/line_array.c \
@@ -26,17 +41,11 @@ TEST_OBJECTS = $(OBJDIR)/test_framework.o $(OBJDIR)/memory_tracker.o
 all: dirs main test
 
 dirs:
-	@if not exist "$(OBJDIR)" mkdir $(OBJDIR)
-	@if not exist "$(OBJDIR)\strings" mkdir $(OBJDIR)\strings
-	@if not exist "$(OBJDIR)\arrays" mkdir $(OBJDIR)\arrays
-	@if not exist "$(OBJDIR)\stacks" mkdir $(OBJDIR)\stacks
-	@if not exist "$(OBJDIR)\queues" mkdir $(OBJDIR)\queues
-	@if not exist "$(OBJDIR)\hashmaps" mkdir $(OBJDIR)\hashmaps
-	@if not exist "$(BINDIR)" mkdir $(BINDIR)
+	@$(MKDIR) $(OBJDIR) $(OBJDIR)/strings $(OBJDIR)/arrays $(OBJDIR)/stacks $(OBJDIR)/queues $(OBJDIR)/hashmaps $(BINDIR)
 
-main: dirs $(BINDIR)/text_editor.exe
+main: dirs $(BINDIR)/text_editor$(EXE_EXT)
 
-$(BINDIR)/text_editor.exe: $(OBJECTS) $(OBJDIR)/main.o
+$(BINDIR)/text_editor$(EXE_EXT): $(OBJECTS) $(OBJDIR)/main.o
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJDIR)/main.o: $(SRCDIR)/main.c
@@ -51,24 +60,27 @@ $(OBJDIR)/test_framework.o: $(TESTDIR)/test_framework/test_framework.c
 $(OBJDIR)/memory_tracker.o: $(TESTDIR)/test_framework/memory_tracker.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-test: dirs $(TEST_OBJECTS) $(addprefix $(BINDIR)/, $(addsuffix .exe, $(TESTS)))
+test: dirs $(TEST_OBJECTS) $(addprefix $(BINDIR)/, $(addsuffix $(EXE_EXT), $(TESTS)))
 
-$(BINDIR)/test_%.exe: $(TESTDIR)/test_%.c $(OBJECTS) $(TEST_OBJECTS)
+$(BINDIR)/test_%$(EXE_EXT): $(TESTDIR)/test_%.c $(OBJECTS) $(TEST_OBJECTS)
 	$(CC) $(CFLAGS) -o $@ $^
 
 run_tests: test
-	@echo Running all tests...
-	@for %%t in ($(TESTS)) do (echo Running %%t... && $(BINDIR)\%%t.exe)
+	@echo "Running all tests..."
+ifeq ($(OS),Windows_NT)
+	@for %%t in ($(TESTS)) do (echo Running %%t... && $(BINDIR)\\%%t.exe)
+else
+	@for t in $(TESTS); do echo "Running $$t..."; $(RUN_TEST); done
+endif
 
 clean:
-	@if exist "$(OBJDIR)" rmdir /s /q $(OBJDIR)
-	@if exist "$(BINDIR)" rmdir /s /q $(BINDIR)
+	@$(RM) $(OBJDIR) $(BINDIR) 2>/dev/null || true
 
 # Individual test targets
-test_string_buffer: $(BINDIR)/test_string_buffer.exe
-test_line_array: $(BINDIR)/test_line_array.exe
-test_undo_stack: $(BINDIR)/test_undo_stack.exe
-test_command_queue: $(BINDIR)/test_command_queue.exe
-test_text_search: $(BINDIR)/test_text_search.exe
-test_text_editor: $(BINDIR)/test_text_editor.exe
-test_space_analysis: $(BINDIR)/test_space_analysis.exe
+test_string_buffer: $(BINDIR)/test_string_buffer$(EXE_EXT)
+test_line_array: $(BINDIR)/test_line_array$(EXE_EXT)
+test_undo_stack: $(BINDIR)/test_undo_stack$(EXE_EXT)
+test_command_queue: $(BINDIR)/test_command_queue$(EXE_EXT)
+test_text_search: $(BINDIR)/test_text_search$(EXE_EXT)
+test_text_editor: $(BINDIR)/test_text_editor$(EXE_EXT)
+test_space_analysis: $(BINDIR)/test_space_analysis$(EXE_EXT)

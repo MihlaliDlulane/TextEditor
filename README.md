@@ -49,7 +49,7 @@ You'll build a text editor simulator by implementing core data structures and an
 ### Prerequisites
 - GCC compiler
 - Make utility
-- Windows environment (cmd.exe)
+- Linux/Unix or Windows environment
 
 ### Build Commands
 
@@ -84,6 +84,10 @@ make test_text_editor
 
 ### Running the Text Editor
 ```bash
+# Linux/Unix
+bin/text_editor
+
+# Windows
 bin/text_editor.exe
 ```
 
@@ -133,10 +137,17 @@ The project includes comprehensive unit tests with **space complexity verificati
 
 Run individual tests:
 ```bash
-bin/test_string_buffer.exe    # O(n) space verification
-bin/test_line_array.exe       # O(n) space with line count
-bin/test_undo_stack.exe       # O(k) space with command count
-bin/test_space_analysis.exe   # Complete space analysis
+# Linux/Unix
+bin/test_string_buffer        # O(n) space verification
+bin/test_line_array          # O(n) space with line count
+bin/test_undo_stack          # O(k) space with command count
+bin/test_space_analysis      # Complete space analysis
+
+# Windows
+bin/test_string_buffer.exe   # O(n) space verification
+bin/test_line_array.exe      # O(n) space with line count
+bin/test_undo_stack.exe      # O(k) space with command count
+bin/test_space_analysis.exe  # Complete space analysis
 ```
 
 ## Space Complexity Analysis
