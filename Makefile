@@ -36,12 +36,63 @@ TESTS = test_string_buffer test_line_array test_undo_stack test_command_queue te
 OBJECTS = $(SOURCES:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 TEST_OBJECTS = $(OBJDIR)/test_framework.o $(OBJDIR)/memory_tracker.o
 
-.PHONY: all clean test main dirs
+.PHONY: all clean test main dirs help run_tests
 
+# Default target
 all: dirs main test
 
+# Help command
+help:
+	@echo "TextEditor Build System"
+	@echo "======================"
+	@echo ""
+	@echo "Main Targets:"
+	@echo "  all          - Build everything (main program and tests)"
+	@echo "  main         - Build only the text editor executable"
+	@echo "  test         - Build all test executables"
+	@echo "  run_tests    - Build and run all tests"
+	@echo "  clean        - Remove all build artifacts"
+	@echo "  help         - Show this help message"
+	@echo ""
+	@echo "Individual Test Targets:"
+	@echo "  test_string_buffer   - Build string buffer tests (Week 1)"
+	@echo "  test_line_array     - Build line array tests (Week 2)"
+	@echo "  test_undo_stack     - Build undo stack tests (Week 3)"
+	@echo "  test_command_queue  - Build command queue tests (Week 3)"
+	@echo "  test_text_search    - Build text search tests (Week 4)"
+	@echo "  test_text_editor    - Build integration tests"
+	@echo "  test_space_analysis - Build space complexity analysis"
+	@echo ""
+	@echo "Usage Examples:"
+	@echo "  make                 # Build everything"
+	@echo "  make main            # Build just the text editor"
+	@echo "  make test_string_buffer  # Build and test Week 1"
+	@echo "  make run_tests       # Run all tests"
+	@echo "  make clean           # Clean up build files"
+	@echo ""
+ifeq ($(OS),Windows_NT)
+	@echo "Running Programs (Windows):"
+	@echo "  bin\\text_editor.exe        # Run the text editor"
+	@echo "  bin\\test_string_buffer.exe # Run string buffer tests"
+else
+	@echo "Running Programs (Linux/Unix):"
+	@echo "  ./bin/text_editor           # Run the text editor"
+	@echo "  ./bin/test_string_buffer    # Run string buffer tests"
+endif
+	@echo ""
+
 dirs:
+ifeq ($(OS),Windows_NT)
+	@if not exist "$(OBJDIR)" $(MKDIR) "$(OBJDIR)"
+	@if not exist "$(OBJDIR)\strings" $(MKDIR) "$(OBJDIR)\strings"
+	@if not exist "$(OBJDIR)\arrays" $(MKDIR) "$(OBJDIR)\arrays"
+	@if not exist "$(OBJDIR)\stacks" $(MKDIR) "$(OBJDIR)\stacks"
+	@if not exist "$(OBJDIR)\queues" $(MKDIR) "$(OBJDIR)\queues"
+	@if not exist "$(OBJDIR)\hashmaps" $(MKDIR) "$(OBJDIR)\hashmaps"
+	@if not exist "$(BINDIR)" $(MKDIR) "$(BINDIR)"
+else
 	@$(MKDIR) $(OBJDIR) $(OBJDIR)/strings $(OBJDIR)/arrays $(OBJDIR)/stacks $(OBJDIR)/queues $(OBJDIR)/hashmaps $(BINDIR)
+endif
 
 main: dirs $(BINDIR)/text_editor$(EXE_EXT)
 
@@ -62,8 +113,8 @@ $(OBJDIR)/memory_tracker.o: $(TESTDIR)/test_framework/memory_tracker.c
 
 test: dirs $(TEST_OBJECTS) $(addprefix $(BINDIR)/, $(addsuffix $(EXE_EXT), $(TESTS)))
 
-$(BINDIR)/test_%$(EXE_EXT): $(TESTDIR)/test_%.c $(OBJECTS) $(TEST_OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $^
+$(BINDIR)/test_%$(EXE_EXT): dirs $(TESTDIR)/test_%.c $(OBJECTS) $(TEST_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $(filter-out dirs,$^)
 
 run_tests: test
 	@echo "Running all tests..."
@@ -74,13 +125,18 @@ else
 endif
 
 clean:
+ifeq ($(OS),Windows_NT)
+	@if exist "$(OBJDIR)" $(RM) "$(OBJDIR)"
+	@if exist "$(BINDIR)" $(RM) "$(BINDIR)"
+else
 	@$(RM) $(OBJDIR) $(BINDIR) 2>/dev/null || true
+endif
 
 # Individual test targets
-test_string_buffer: $(BINDIR)/test_string_buffer$(EXE_EXT)
-test_line_array: $(BINDIR)/test_line_array$(EXE_EXT)
-test_undo_stack: $(BINDIR)/test_undo_stack$(EXE_EXT)
-test_command_queue: $(BINDIR)/test_command_queue$(EXE_EXT)
-test_text_search: $(BINDIR)/test_text_search$(EXE_EXT)
-test_text_editor: $(BINDIR)/test_text_editor$(EXE_EXT)
-test_space_analysis: $(BINDIR)/test_space_analysis$(EXE_EXT)
+test_string_buffer: dirs $(BINDIR)/test_string_buffer$(EXE_EXT)
+test_line_array: dirs $(BINDIR)/test_line_array$(EXE_EXT)
+test_undo_stack: dirs $(BINDIR)/test_undo_stack$(EXE_EXT)
+test_command_queue: dirs $(BINDIR)/test_command_queue$(EXE_EXT)
+test_text_search: dirs $(BINDIR)/test_text_search$(EXE_EXT)
+test_text_editor: dirs $(BINDIR)/test_text_editor$(EXE_EXT)
+test_space_analysis: dirs $(BINDIR)/test_space_analysis$(EXE_EXT)

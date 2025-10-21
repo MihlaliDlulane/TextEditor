@@ -17,6 +17,7 @@ void append_string(StringBuffer *sb, const char *text) {
   // Key concepts: Dynamic memory allocation, buffer overflow prevention
   // Space complexity: O(n) where n is total string length
   // Hint: Check if current capacity can hold new text, resize if needed
+    
 }
 
 void prepend_string(StringBuffer *sb, const char *text) {
