@@ -197,7 +197,7 @@ int main(void) {
 
   clear_buffer(sb);
   append_string(sb, "Hello World");
-  remove_substring(sb, 5, 6); // Remove " World"
+  remove_substring(sb, 5, get_length(sb));
   ASSERT_EQ_STR(&tf, "remove substring", get_content(sb), "Hello");
 
   free_string_buffer(sb);
